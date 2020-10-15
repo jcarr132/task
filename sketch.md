@@ -5,6 +5,7 @@ A minimal CLI for tracking and managing tasks.
 
 ## Requirements
 - Written in Go
+- CLI or TUI interface (both)
 - Text file database
 - Import external calendars (e.g., Google)
 - Multiple independent lists of tasks
@@ -27,9 +28,11 @@ A minimal CLI for tracking and managing tasks.
   - Decentralized: Each instance of the app is independent, maintains it's own
     database. Databases sync with each other.
 
+
 ## Task Schema
 - Simple data serialization format (YAML or TOML)
 - Fields:
+  - ID
   - Name or short description
   - Deadline OR Timeslot OR Untimed
   - Tags
