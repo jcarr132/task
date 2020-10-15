@@ -4,27 +4,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 
-	"github.com/google/uuid"
-	"github.com/sonyarouje/simdb/db"
+	"task/tasklist"
+
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	driver, err := db.New("data")
-	if err != nil {
-		panic(err)
-	}
 
-	task := Task{
-		TaskID: uuid.New(),
-		Name:   "example task",
-	}
-
-	err = driver.Insert(task)
-	if err != nil {
-		panic(err)
-	}
+	tl := tasklist.NewTasklist()
+	fmt.Println(reflect.TypeOf(tl.Tasks()[0]))
 
 	app := &cli.App{
 		Name:  "task",
@@ -36,6 +26,11 @@ func main() {
 				Usage:   "list all tasks",
 				Action: func(c *cli.Context) error {
 					fmt.Println("running 'task list'")
+
+					for i, task := range tl.Tasks() {
+						fmt.Println(i, task.Name, task.Notes)
+					}
+
 					return nil
 				},
 			},
@@ -48,15 +43,4 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
-}
-
-type Task struct {
-	TaskID uuid.UUID
-	Name   string `json:"name"`
-}
-
-func (t Task) ID() (jsonField string, value interface{}) {
-	value = t.TaskID
-	jsonField = "id"
-	return
 }
