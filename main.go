@@ -14,7 +14,16 @@ import (
 func main() {
 
 	tl := tasklist.NewTasklist()
-	fmt.Println(reflect.TypeOf(tl.Tasks()[0]))
+
+	tl.AddTask(tasklist.NewTask("function test"))
+	tl.AddTask(tasklist.NewTask("function test"))
+	tl.AddTask(tasklist.NewTask("function test"))
+
+	t := tl.Tasks()[0]
+	fmt.Println(reflect.TypeOf(t))
+	fmt.Println(t.ID())
+	// fmt.Println(t)
+	// tl.CompleteTask(t)
 
 	app := &cli.App{
 		Name:  "task",
@@ -28,7 +37,7 @@ func main() {
 					fmt.Println("running 'task list'")
 
 					for i, task := range tl.Tasks() {
-						fmt.Println(i, task.Name, task.Notes)
+						fmt.Println(i, task.TaskID, task.Name, task.Notes, task.Complete)
 					}
 
 					return nil

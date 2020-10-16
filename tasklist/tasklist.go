@@ -47,14 +47,37 @@ func (tl TaskList) Tasks() []Task {
 	return tasks
 }
 
+// TODO docstring
+func (tl TaskList) AddTask(task Task) {
+	err := tl.Db.Insert(task)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// TODO docstring
+// FIXME Db.Update doesn't correctly match on UUID
+func (tl TaskList) CompleteTask(task Task) {
+	task.Complete = true
+	err := tl.Db.Update(task)
+	if err != nil {
+		panic(err)
+	}
+}
+
 /*
 The Task struct holds data about a task. Each Task is assigned a random UUID
 which is used as it's primary identifier.
 */
 type Task struct {
-	TaskID uuid.UUID
-	Name   string `json:"name"`
-	Notes  string `json:"notes"`
+	TaskID   uuid.UUID `json:"taskid"`
+	Name     string    `json:"name"`
+	Complete bool      `json:"complete"`
+	Notes    string    `json:"notes"`
+	// TODO deadline/timeslot
+	// TODO tags
+	// TODO priority
+	// TODO subtasks
 }
 
 /*
@@ -62,6 +85,16 @@ Task implements ID to conform to the database library (`simdb`) requirements.
 */
 func (t Task) ID() (jsonField string, value interface{}) {
 	value = t.TaskID
-	jsonField = "id"
+	jsonField = "taskid"
 	return
+}
+
+// TODO docstring
+func NewTask(name string) Task {
+	return Task{
+		TaskID:   uuid.New(),
+		Name:     name,
+		Complete: false,
+		Notes:    "",
+	}
 }
