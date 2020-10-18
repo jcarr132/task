@@ -3,9 +3,8 @@ module task
 go 1.15
 
 require (
+	github.com/boltdb/bolt v1.3.1
 	github.com/google/uuid v1.1.2
-	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25
-	github.com/sdomino/scribble v0.0.0-20200707180004-3cc68461d505
-	github.com/sonyarouje/simdb v0.0.0-20181202125413-c2488dfc374a
 	github.com/urfave/cli/v2 v2.2.0
+	golang.org/x/sys v0.0.0-20201018121011-98379d014ca7
 )

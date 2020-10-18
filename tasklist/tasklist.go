@@ -1,13 +1,17 @@
 /*
-Tasklist handles interaction with the JSON database (`simdb`). This package
+Tasklist handles interaction with the JSON database. This package
 defines the TaskList struct type, which wraps the database connection, and
 the Task struct, which holds data for a single task.
 */
 package tasklist
 
 import (
+	"github.com/boltdb/bolt"
 	"github.com/google/uuid"
-	"github.com/sonyarouje/simdb/db"
+
+	"encoding/binary"
+	"encoding/json"
+	"fmt"
 )
 
 /*
@@ -15,21 +19,22 @@ TaskList simply wraps the database driver and provides methods for acting
 on the list as a whole.
 */
 type TaskList struct {
-	Db db.Driver
+	Db *bolt.DB
 }
 
 /*
 NewTaskList returns a new TaskList struct containing a connection to the
-`simdb` database.
+database.
 */
 func NewTasklist() TaskList {
-	driver, err := db.New("data")
+	db, err := bolt.Open("data", 0600, nil)
 	if err != nil {
 		panic(err)
 	}
+	defer db.Close()
 
 	return TaskList{
-		Db: *driver,
+		Db: db,
 	}
 }
 
@@ -37,64 +42,107 @@ func NewTasklist() TaskList {
 Tasks() queries the database returns a slice containing the tasks stored
 within.
 */
+// FIXME
 func (tl TaskList) Tasks() []Task {
 	var tasks []Task
-	err := tl.Db.Open(Task{}).Get().AsEntity(&tasks)
-	if err != nil {
-		panic(err)
-	}
 
+	tl.Db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("tasks"))
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			var task Task
+			err := json.Unmarshal(v, &task)
+			if err != nil {
+				return err
+			}
+			tasks = append(tasks, task)
+		}
+
+		return nil
+	})
+
+	fmt.Println("len(tasks) = ", len(tasks))
 	return tasks
 }
 
 // TODO docstring
-func (tl TaskList) AddTask(task Task) {
-	err := tl.Db.Insert(task)
+func (tl TaskList) AddTask(task Task) error {
+	db, err := bolt.Open("data", 0600, nil)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	defer db.Close()
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+
+		buf, err := json.Marshal(task)
+		if err != nil {
+			return err
+		}
+
+		key, err := task.TaskId.MarshalBinary()
+		if err != nil {
+			return err
+		}
+
+		return b.Put(key, buf)
+	})
+
+	return err
 }
 
 // TODO docstring
 // FIXME Db.Update doesn't correctly match on UUID
-func (tl TaskList) CompleteTask(task Task) {
-	task.Complete = true
-	err := tl.Db.Update(task)
-	if err != nil {
-		panic(err)
-	}
-}
+// func (tl TaskList) CompleteTask(task Task) {
+// task.Complete = true
+// err := tl.Db.Update(task)
+// if err != nil {
+// 	panic(err)
+// }
+// }
+
+// func LoadFromDB(db bolt.DB) []Task {
+// 	db.View(func(tx *bolt.Tx) error {
+
+// 		return nil
+// 	})
+
+// 	return
+// }
+
+// func SaveToDB
 
 /*
 The Task struct holds data about a task. Each Task is assigned a random UUID
 which is used as it's primary identifier.
 */
 type Task struct {
-	TaskID   uuid.UUID `json:"taskid"`
-	Name     string    `json:"name"`
-	Complete bool      `json:"complete"`
-	Notes    string    `json:"notes"`
+	TaskId uuid.UUID `json:"taskid"`
+	// TaskId   int       `json:"taskid"`
+	Name     string `json:"name"`
+	Complete bool   `json:"complete"`
+	Notes    string `json:"notes"`
 	// TODO deadline/timeslot
 	// TODO tags
 	// TODO priority
 	// TODO subtasks
 }
 
-/*
-Task implements ID to conform to the database library (`simdb`) requirements.
-*/
-func (t Task) ID() (jsonField string, value interface{}) {
-	value = t.TaskID
-	jsonField = "taskid"
-	return
-}
-
 // TODO docstring
 func NewTask(name string) Task {
 	return Task{
-		TaskID:   uuid.New(),
+		TaskId:   uuid.New(),
 		Name:     name,
 		Complete: false,
 		Notes:    "",
 	}
+}
+
+// itob returns an 8-byte big endian representation of v.
+func itob(v int) []byte {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, uint64(v))
+	return b
 }

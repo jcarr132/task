@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"reflect"
+	// "reflect"
 
 	"task/tasklist"
 
@@ -19,9 +19,9 @@ func main() {
 	tl.AddTask(tasklist.NewTask("function test"))
 	tl.AddTask(tasklist.NewTask("function test"))
 
-	t := tl.Tasks()[0]
-	fmt.Println(reflect.TypeOf(t))
-	fmt.Println(t.ID())
+	// t := tl.Tasks()[0]
+	// fmt.Println(reflect.TypeOf(t))
+	// fmt.Println(t.TaskID)
 	// fmt.Println(t)
 	// tl.CompleteTask(t)
 
@@ -37,7 +37,7 @@ func main() {
 					fmt.Println("running 'task list'")
 
 					for i, task := range tl.Tasks() {
-						fmt.Println(i, task.TaskID, task.Name, task.Notes, task.Complete)
+						fmt.Println(i, task.TaskId, task.Name, task.Notes, task.Complete)
 					}
 
 					return nil
