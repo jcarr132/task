@@ -33,6 +33,11 @@ func NewTasklist() TaskList {
 	}
 	defer db.Close()
 
+	db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte("tasks"))
+		return err
+	})
+
 	return TaskList{
 		Db: db,
 	}
@@ -42,13 +47,22 @@ func NewTasklist() TaskList {
 Tasks() queries the database returns a slice containing the tasks stored
 within.
 */
-// FIXME
 func (tl TaskList) Tasks() []Task {
+	db, err := bolt.Open("data", 0600, nil)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
 	var tasks []Task
 
-	tl.Db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("tasks"))
-		c := b.Cursor()
+	err = db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("tasks"))
+		if err != nil {
+			panic(err)
+		}
+
+		c := bucket.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 			var task Task
@@ -58,11 +72,9 @@ func (tl TaskList) Tasks() []Task {
 			}
 			tasks = append(tasks, task)
 		}
-
 		return nil
 	})
 
-	fmt.Println("len(tasks) = ", len(tasks))
 	return tasks
 }
 
@@ -75,7 +87,7 @@ func (tl TaskList) AddTask(task Task) error {
 	defer db.Close()
 
 	err = db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
 
 		buf, err := json.Marshal(task)
 		if err != nil {
@@ -87,7 +99,7 @@ func (tl TaskList) AddTask(task Task) error {
 			return err
 		}
 
-		return b.Put(key, buf)
+		return bucket.Put(key, buf)
 	})
 
 	return err
