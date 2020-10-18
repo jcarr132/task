@@ -9,9 +9,8 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/google/uuid"
 
-	"encoding/binary"
 	"encoding/json"
-	"fmt"
+	// "fmt"
 )
 
 /*
@@ -106,7 +105,7 @@ func (tl TaskList) AddTask(task Task) error {
 }
 
 // TODO docstring
-// FIXME Db.Update doesn't correctly match on UUID
+// TODO reimplement with boltdb
 // func (tl TaskList) CompleteTask(task Task) {
 // task.Complete = true
 // err := tl.Db.Update(task)
@@ -115,27 +114,15 @@ func (tl TaskList) AddTask(task Task) error {
 // }
 // }
 
-// func LoadFromDB(db bolt.DB) []Task {
-// 	db.View(func(tx *bolt.Tx) error {
-
-// 		return nil
-// 	})
-
-// 	return
-// }
-
-// func SaveToDB
-
 /*
 The Task struct holds data about a task. Each Task is assigned a random UUID
 which is used as it's primary identifier.
 */
 type Task struct {
-	TaskId uuid.UUID `json:"taskid"`
-	// TaskId   int       `json:"taskid"`
-	Name     string `json:"name"`
-	Complete bool   `json:"complete"`
-	Notes    string `json:"notes"`
+	TaskId   uuid.UUID `json:"taskid"`
+	Name     string    `json:"name"`
+	Complete bool      `json:"complete"`
+	Notes    string    `json:"notes"`
 	// TODO deadline/timeslot
 	// TODO tags
 	// TODO priority
@@ -150,11 +137,4 @@ func NewTask(name string) Task {
 		Complete: false,
 		Notes:    "",
 	}
-}
-
-// itob returns an 8-byte big endian representation of v.
-func itob(v int) []byte {
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(v))
-	return b
 }
