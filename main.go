@@ -60,6 +60,15 @@ func main() {
 				},
 			},
 			{
+				Name:    "remove",
+				Aliases: []string{"r", "rm"},
+				Usage:   "remove a task from the list",
+				Action: func(c *cli.Context) error {
+					tl.RemoveTask(tl.SelectTask())
+					return nil
+				},
+			},
+			{
 				// Next subcommand
 			},
 		},

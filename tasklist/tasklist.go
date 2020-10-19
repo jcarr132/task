@@ -4,10 +4,7 @@ the Task struct, which holds data for a single task.  */
 package tasklist
 
 import (
-	// "bufio"
 	"fmt"
-	// "os"
-	// "strconv"
 
 	"github.com/boltdb/bolt"
 	"github.com/google/uuid"
@@ -108,6 +105,25 @@ func (tl TaskList) CompleteTask(task Task) {
 	tl.AddTask(task)
 }
 
+/* UncompleteTask sets a Task's `complete` field to `false` and re-adds it to the
+database, overwriting the previous version. */
+func (tl TaskList) UncompleteTask(task Task) {
+	task.Complete = false
+	tl.AddTask(task)
+}
+
+/* ToggleComplete changes the `complete` field of a Task from `true` to `false` or
+from `true` to `false` as appropriate and re-adds it to the database, overwriting
+the previous version. */
+func (tl TaskList) ToggleComplete(task Task) {
+	if task.Complete == true {
+		task.Complete = false
+	} else {
+		task.Complete = true
+	}
+	tl.AddTask(task)
+}
+
 /* SelectTask prints an enumerated list of tasks to stdout and accepts an integer
 input from the user indicating which Task struct to return. Used in conjunction with
 another method that accepts a Task struct such as TaskList.Complete(...).
@@ -129,6 +145,26 @@ func (tl TaskList) SelectTask() Task {
 	}
 
 	return tasks[selection-1]
+}
+
+/* RemoveTask deletes a task from the database. */
+func (tl TaskList) RemoveTask(task Task) {
+	db, err := bolt.Open("data", 0600, nil)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+
+		key, err := task.TaskId.MarshalBinary()
+		if err != nil {
+			return err
+		}
+
+		return bucket.Delete(key)
+	})
 }
 
 /* The Task struct holds data about a task. Each Task is assigned a random UUID
