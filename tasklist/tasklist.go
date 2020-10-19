@@ -5,6 +5,7 @@ package tasklist
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/boltdb/bolt"
 	"github.com/google/uuid"
@@ -19,11 +20,11 @@ type TaskList struct {
 }
 
 /* NewTaskList returns a new TaskList struct containing a connection to the
-database.  */
+database. */
 func NewTasklist() TaskList {
 	db, err := bolt.Open("data", 0600, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -38,11 +39,11 @@ func NewTasklist() TaskList {
 }
 
 /* Tasks() queries the database returns a slice containing the tasks stored
-within.  */
+within. */
 func (tl TaskList) Tasks() []Task {
 	db, err := bolt.Open("data", 0600, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -51,7 +52,7 @@ func (tl TaskList) Tasks() []Task {
 	err = db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("tasks"))
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		c := bucket.Cursor()
@@ -141,7 +142,7 @@ func (tl TaskList) SelectTask() Task {
 	var selection int
 	_, err := fmt.Scanf("%d", &selection)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return tasks[selection-1]
@@ -151,7 +152,7 @@ func (tl TaskList) SelectTask() Task {
 func (tl TaskList) RemoveTask(task Task) {
 	db, err := bolt.Open("data", 0600, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
