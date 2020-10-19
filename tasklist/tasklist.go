@@ -4,13 +4,15 @@ the Task struct, which holds data for a single task.  */
 package tasklist
 
 import (
+	// "bufio"
 	"fmt"
+	// "os"
+	// "strconv"
 
 	"github.com/boltdb/bolt"
 	"github.com/google/uuid"
 
 	"encoding/json"
-	// "fmt"
 )
 
 /* TaskList simply wraps the database driver and provides methods for acting
@@ -106,6 +108,29 @@ func (tl TaskList) CompleteTask(task Task) {
 	tl.AddTask(task)
 }
 
+/* SelectTask prints an enumerated list of tasks to stdout and accepts an integer
+input from the user indicating which Task struct to return. Used in conjunction with
+another method that accepts a Task struct such as TaskList.Complete(...).
+
+Example:
+					tl.CompleteTask(tl.SelectTask())
+*/
+func (tl TaskList) SelectTask() Task {
+	tasks := tl.Tasks()
+	for i, task := range tasks {
+		fmt.Println(i+1, task)
+	}
+
+	fmt.Print("Enter selection: ")
+	var selection int
+	_, err := fmt.Scanf("%d", &selection)
+	if err != nil {
+		panic(err)
+	}
+
+	return tasks[selection-1]
+}
+
 /* The Task struct holds data about a task. Each Task is assigned a random UUID
 which is used as it's primary identifier.  */
 type Task struct {
@@ -113,10 +138,11 @@ type Task struct {
 	Name     string    `json:"name"`
 	Complete bool      `json:"complete"`
 	Notes    string    `json:"notes"`
-	// TODO deadline/timeslot
-	// TODO tags
-	// TODO priority
-	// TODO subtasks
+	// TODO implement the rest of the fields
+	// deadline/timeslot
+	// tags
+	// priority
+	// subtasks
 }
 
 /* NewTask returns a new Task struct with the given name and randomly generated
@@ -131,6 +157,16 @@ func NewTask(name string) Task {
 	}
 }
 
+/* String describes how the string representation of a Task struct and enables
+printing with fmt.Println(). */
 func (t Task) String() string {
-	return fmt.Sprintf("Task: %s\nComplete: %v\n", t.Name, t.Complete)
+	var checkbox string
+
+	if t.Complete == true {
+		checkbox = "[x]"
+	} else {
+		checkbox = "[ ]"
+	}
+
+	return fmt.Sprintf("%s - %s", checkbox, t.Name)
 }

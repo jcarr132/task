@@ -16,14 +16,14 @@ func main() {
 	tl := tasklist.NewTasklist()
 
 	// reinitialize the database (testing)
-	os.Remove("data")
-	tl.AddTask(tasklist.NewTask("buy groceries"))
-	tl.AddTask(tasklist.NewTask("work on cli task manager program"))
-	tl.AddTask(tasklist.NewTask("pay bills"))
+	// os.Remove("data")
+	// tl.AddTask(tasklist.NewTask("buy groceries"))
+	// tl.AddTask(tasklist.NewTask("work on cli task manager program"))
+	// tl.AddTask(tasklist.NewTask("pay bills"))
 
 	// test completing a task
-	t := tl.Tasks()[0]
-	tl.CompleteTask(t)
+	// t := tl.Tasks()[0]
+	// tl.CompleteTask(t)
 
 	app := &cli.App{
 		Name:  "task",
@@ -34,12 +34,28 @@ func main() {
 				Aliases: []string{"l"},
 				Usage:   "list all tasks",
 				Action: func(c *cli.Context) error {
-					fmt.Println("running 'task list'")
-
 					for _, task := range tl.Tasks() {
 						fmt.Println(task)
 					}
-
+					return nil
+				},
+			},
+			{
+				Name:    "add",
+				Aliases: []string{"a"},
+				Usage:   "add a task to the tasklist",
+				Action: func(c *cli.Context) error {
+					name := c.Args().Get(0)
+					tl.AddTask(tasklist.NewTask(name))
+					return nil
+				},
+			},
+			{
+				Name:    "complete",
+				Aliases: []string{"c"},
+				Usage:   "mark a task as 'completed'",
+				Action: func(c *cli.Context) error {
+					tl.CompleteTask(tl.SelectTask())
 					return nil
 				},
 			},
