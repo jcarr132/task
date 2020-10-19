@@ -6,6 +6,8 @@ the Task struct, which holds data for a single task.
 package tasklist
 
 import (
+	"fmt"
+
 	"github.com/boltdb/bolt"
 	"github.com/google/uuid"
 
@@ -137,4 +139,8 @@ func NewTask(name string) Task {
 		Complete: false,
 		Notes:    "",
 	}
+}
+
+func (t Task) String() string {
+	return fmt.Sprintf("Task: %s\nComplete: %v\n", t.Name, t.Complete)
 }

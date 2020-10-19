@@ -15,9 +15,11 @@ func main() {
 
 	tl := tasklist.NewTasklist()
 
-	tl.AddTask(tasklist.NewTask("function test"))
-	tl.AddTask(tasklist.NewTask("function test"))
-	tl.AddTask(tasklist.NewTask("function test"))
+	// reinitialize the database (testing)
+	os.Remove("data")
+	tl.AddTask(tasklist.NewTask("buy groceries"))
+	tl.AddTask(tasklist.NewTask("work on cli task manager program"))
+	tl.AddTask(tasklist.NewTask("pay bills"))
 
 	// t := tl.Tasks()[0]
 	// fmt.Println(reflect.TypeOf(t))
@@ -36,8 +38,8 @@ func main() {
 				Action: func(c *cli.Context) error {
 					fmt.Println("running 'task list'")
 
-					for i, task := range tl.Tasks() {
-						fmt.Println(i, task.TaskId, task.Name, task.Notes, task.Complete)
+					for _, task := range tl.Tasks() {
+						fmt.Println(task)
 					}
 
 					return nil
