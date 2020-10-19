@@ -21,11 +21,9 @@ func main() {
 	tl.AddTask(tasklist.NewTask("work on cli task manager program"))
 	tl.AddTask(tasklist.NewTask("pay bills"))
 
-	// t := tl.Tasks()[0]
-	// fmt.Println(reflect.TypeOf(t))
-	// fmt.Println(t.TaskID)
-	// fmt.Println(t)
-	// tl.CompleteTask(t)
+	// test completing a task
+	t := tl.Tasks()[0]
+	tl.CompleteTask(t)
 
 	app := &cli.App{
 		Name:  "task",

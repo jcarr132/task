@@ -89,6 +89,7 @@ func (tl TaskList) AddTask(task Task) error {
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+		// bucket := tx.Bucket([]byte("tasks"))
 
 		buf, err := json.Marshal(task)
 		if err != nil {
@@ -108,13 +109,10 @@ func (tl TaskList) AddTask(task Task) error {
 
 // TODO docstring
 // TODO reimplement with boltdb
-// func (tl TaskList) CompleteTask(task Task) {
-// task.Complete = true
-// err := tl.Db.Update(task)
-// if err != nil {
-// 	panic(err)
-// }
-// }
+func (tl TaskList) CompleteTask(task Task) {
+	task.Complete = true
+	tl.AddTask(task)
+}
 
 /*
 The Task struct holds data about a task. Each Task is assigned a random UUID
