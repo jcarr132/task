@@ -5,7 +5,7 @@ A minimal CLI for tracking and managing tasks.
 
 ## Requirements
 - Written in Go
-- CLI or TUI interface (both)
+- Command (CLI) and Interactive (TUI) modes
 - Text file database
 - Import external calendars (e.g., Google)
 - Multiple independent lists of tasks
