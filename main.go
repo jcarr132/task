@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	// "reflect"
 
 	"task/tasklist"
 
@@ -14,16 +13,6 @@ import (
 func main() {
 
 	tl := tasklist.NewTasklist()
-
-	// reinitialize the database (testing)
-	// os.Remove("data")
-	// tl.AddTask(tasklist.NewTask("buy groceries"))
-	// tl.AddTask(tasklist.NewTask("work on cli task manager program"))
-	// tl.AddTask(tasklist.NewTask("pay bills"))
-
-	// test completing a task
-	// t := tl.Tasks()[0]
-	// tl.CompleteTask(t)
 
 	app := &cli.App{
 		Name:  "task",
@@ -51,6 +40,15 @@ func main() {
 				},
 			},
 			{
+				Name:    "remove",
+				Aliases: []string{"r", "rm"},
+				Usage:   "remove a task from the list",
+				Action: func(c *cli.Context) error {
+					tl.RemoveTask(tl.SelectTask())
+					return nil
+				},
+			},
+			{
 				Name:    "complete",
 				Aliases: []string{"c"},
 				Usage:   "mark a task as 'completed'",
@@ -60,11 +58,20 @@ func main() {
 				},
 			},
 			{
-				Name:    "remove",
-				Aliases: []string{"r", "rm"},
-				Usage:   "remove a task from the list",
+				Name:    "uncomplete",
+				Aliases: []string{"C"},
+				Usage:   "mark a task as `incomplete`",
 				Action: func(c *cli.Context) error {
-					tl.RemoveTask(tl.SelectTask())
+					tl.UncompleteTask(tl.SelectTask())
+					return nil
+				},
+			},
+			{
+				Name:    "toggle",
+				Aliases: []string{"t"},
+				Usage:   "toggle the completion state of a task",
+				Action: func(c *cli.Context) error {
+					tl.ToggleComplete(tl.SelectTask())
 					return nil
 				},
 			},
