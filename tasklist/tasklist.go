@@ -1,6 +1,6 @@
 /* Tasklist handles interaction with the JSON database. This package
 defines the TaskList struct type, which wraps the database connection, and
-the Task struct, which holds data for a single task.  */
+the Task struct, which holds data for a single task. */
 package tasklist
 
 import (
@@ -14,7 +14,7 @@ import (
 )
 
 /* TaskList simply wraps the database driver and provides methods for acting
-on the list as a whole.  */
+on the list as a whole. */
 type TaskList struct {
 	Db *bolt.DB
 }
@@ -26,12 +26,6 @@ func NewTasklist() TaskList {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
-
-	db.Update(func(tx *bolt.Tx) error {
-		_, err = tx.CreateBucketIfNotExists([]byte("tasks"))
-		return err
-	})
 
 	return TaskList{
 		Db: db,
@@ -40,21 +34,11 @@ func NewTasklist() TaskList {
 
 /* Tasks() queries the database returns a slice containing the tasks stored
 within. */
-func (tl TaskList) Tasks() []Task {
-	db, err := bolt.Open("data", 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
+func (tl *TaskList) Tasks() []Task {
 	var tasks []Task
 
-	err = db.View(func(tx *bolt.Tx) error {
+	err := tl.Db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("tasks"))
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		c := bucket.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {
@@ -67,6 +51,9 @@ func (tl TaskList) Tasks() []Task {
 		}
 		return nil
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return tasks
 }
@@ -74,13 +61,7 @@ func (tl TaskList) Tasks() []Task {
 /* AddTask accepts a Task struct as an argument and saves it to the database with
 its UUID (Task.TaskId) as the database key. */
 func (tl TaskList) AddTask(task Task) error {
-	db, err := bolt.Open("data", 0600, nil)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	err = db.Update(func(tx *bolt.Tx) error {
+	err := tl.Db.Update(func(tx *bolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
 
 		buf, err := json.Marshal(task)
@@ -100,7 +81,7 @@ func (tl TaskList) AddTask(task Task) error {
 }
 
 /* CompleteTask sets a Task's `complete` field to `true` and re-adds it to the
-database, overwriting the previous version.  */
+database, overwriting the previous version. */
 func (tl TaskList) CompleteTask(task Task) {
 	task.Complete = true
 	tl.AddTask(task)
@@ -150,13 +131,7 @@ func (tl TaskList) SelectTask() Task {
 
 /* RemoveTask deletes a task from the database. */
 func (tl TaskList) RemoveTask(task Task) {
-	db, err := bolt.Open("data", 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	err = db.Update(func(tx *bolt.Tx) error {
+	err := tl.Db.Update(func(tx *bolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
 
 		key, err := task.TaskId.MarshalBinary()
@@ -166,10 +141,14 @@ func (tl TaskList) RemoveTask(task Task) {
 
 		return bucket.Delete(key)
 	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 /* The Task struct holds data about a task. Each Task is assigned a random UUID
-which is used as it's primary identifier.  */
+which is used as it's primary identifier. */
 type Task struct {
 	TaskId   uuid.UUID `json:"taskid"`
 	Name     string    `json:"name"`
@@ -184,7 +163,7 @@ type Task struct {
 
 /* NewTask returns a new Task struct with the given name and randomly generated
 UUID.  By default, the new Task is incomplete (Task.Complete = false), and
-has no notes associated with it.*/
+has no notes associated with it. */
 func NewTask(name string) Task {
 	return Task{
 		TaskId:   uuid.New(),
