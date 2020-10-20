@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-
 	tl := tasklist.NewTasklist()
+	defer tl.Db.Close()
 
 	app := &cli.App{
 		Name:  "task",
@@ -26,7 +26,6 @@ func main() {
 					for _, task := range tl.Tasks() {
 						fmt.Println(task)
 					}
-					tl.Db.Close()
 					return nil
 				},
 			},
@@ -37,7 +36,6 @@ func main() {
 				Action: func(c *cli.Context) error {
 					name := c.Args().Get(0)
 					tl.AddTask(tasklist.NewTask(name))
-					tl.Db.Close()
 					return nil
 				},
 			},
@@ -47,7 +45,6 @@ func main() {
 				Usage:   "remove a task from the list",
 				Action: func(c *cli.Context) error {
 					tl.RemoveTask(tl.SelectTask())
-					tl.Db.Close()
 					return nil
 				},
 			},
@@ -57,7 +54,6 @@ func main() {
 				Usage:   "mark a task as 'completed'",
 				Action: func(c *cli.Context) error {
 					tl.CompleteTask(tl.SelectTask())
-					tl.Db.Close()
 					return nil
 				},
 			},
@@ -67,7 +63,6 @@ func main() {
 				Usage:   "mark a task as `incomplete`",
 				Action: func(c *cli.Context) error {
 					tl.UncompleteTask(tl.SelectTask())
-					tl.Db.Close()
 					return nil
 				},
 			},
@@ -77,7 +72,6 @@ func main() {
 				Usage:   "toggle the completion state of a task",
 				Action: func(c *cli.Context) error {
 					tl.ToggleComplete(tl.SelectTask())
-					tl.Db.Close()
 					return nil
 				},
 			},

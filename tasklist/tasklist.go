@@ -27,9 +27,11 @@ func NewTasklist() TaskList {
 		log.Fatal(err)
 	}
 
-	return TaskList{
+	tl := TaskList{
 		Db: db,
 	}
+
+	return tl
 }
 
 /* Tasks() queries the database returns a slice containing the tasks stored
