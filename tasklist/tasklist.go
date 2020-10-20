@@ -86,14 +86,18 @@ func (tl TaskList) AddTask(task Task) error {
 database, overwriting the previous version. */
 func (tl TaskList) CompleteTask(task Task) {
 	task.Complete = true
-	tl.AddTask(task)
+	if err := tl.AddTask(task); err != nil {
+		log.Fatal(err)
+	}
 }
 
 /* UncompleteTask sets a Task's `complete` field to `false` and re-adds it to the
 database, overwriting the previous version. */
 func (tl TaskList) UncompleteTask(task Task) {
 	task.Complete = false
-	tl.AddTask(task)
+	if err := tl.AddTask(task); err != nil {
+		log.Fatal(err)
+	}
 }
 
 /* ToggleComplete changes the `complete` field of a Task from `true` to `false` or
@@ -105,7 +109,9 @@ func (tl TaskList) ToggleComplete(task Task) {
 	} else {
 		task.Complete = true
 	}
-	tl.AddTask(task)
+	if err := tl.AddTask(task); err != nil {
+		log.Fatal(err)
+	}
 }
 
 /* SelectTask prints an enumerated list of tasks to stdout and accepts an integer
@@ -117,6 +123,7 @@ Example:
 */
 func (tl TaskList) SelectTask() Task {
 	tasks := tl.Tasks()
+
 	for i, task := range tasks {
 		fmt.Println(i+1, task)
 	}
@@ -132,8 +139,8 @@ func (tl TaskList) SelectTask() Task {
 }
 
 /* RemoveTask deletes a task from the database. */
-func (tl TaskList) RemoveTask(task Task) {
-	err := tl.Db.Update(func(tx *bolt.Tx) error {
+func (tl TaskList) RemoveTask(task Task) error {
+	return tl.Db.Update(func(tx *bolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
 
 		key, err := task.TaskId.MarshalBinary()
@@ -143,10 +150,6 @@ func (tl TaskList) RemoveTask(task Task) {
 
 		return bucket.Delete(key)
 	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 /* The Task struct holds data about a task. Each Task is assigned a random UUID
