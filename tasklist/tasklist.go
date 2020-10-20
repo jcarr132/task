@@ -27,6 +27,14 @@ func NewTasklist() TaskList {
 		log.Fatal(err)
 	}
 
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte("tasks"))
+		return err
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	tl := TaskList{
 		Db: db,
 	}
@@ -63,8 +71,8 @@ func (tl *TaskList) Tasks() []Task {
 /* AddTask accepts a Task struct as an argument and saves it to the database with
 its UUID (Task.TaskId) as the database key. */
 func (tl TaskList) AddTask(task Task) error {
-	err := tl.Db.Update(func(tx *bolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
+	return tl.Db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("tasks"))
 
 		buf, err := json.Marshal(task)
 		if err != nil {
@@ -78,8 +86,6 @@ func (tl TaskList) AddTask(task Task) error {
 
 		return bucket.Put(key, buf)
 	})
-
-	return err
 }
 
 /* CompleteTask sets a Task's `complete` field to `true` and re-adds it to the
