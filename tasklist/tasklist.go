@@ -8,8 +8,9 @@ import (
 	"log"
 
 	"github.com/boltdb/bolt"
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 
+	"encoding/binary"
 	"encoding/json"
 )
 
@@ -74,17 +75,14 @@ func (tl TaskList) AddTask(task Task) error {
 	return tl.Db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("tasks"))
 
+		id, _ := bucket.NextSequence()
+		task.TaskId = int(id)
 		buf, err := json.Marshal(task)
 		if err != nil {
 			return err
 		}
 
-		key, err := task.TaskId.MarshalBinary()
-		if err != nil {
-			return err
-		}
-
-		return bucket.Put(key, buf)
+		return bucket.Put(itob(task.TaskId), buf)
 	})
 }
 
@@ -149,22 +147,22 @@ func (tl TaskList) RemoveTask(task Task) error {
 	return tl.Db.Update(func(tx *bolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte("tasks"))
 
-		key, err := task.TaskId.MarshalBinary()
+		key := task.TaskId
 		if err != nil {
 			return err
 		}
 
-		return bucket.Delete(key)
+		return bucket.Delete(itob(key))
 	})
 }
 
 /* The Task struct holds data about a task. Each Task is assigned a random UUID
 which is used as it's primary identifier. */
 type Task struct {
-	TaskId   uuid.UUID `json:"taskid"`
-	Name     string    `json:"name"`
-	Complete bool      `json:"complete"`
-	Notes    string    `json:"notes"`
+	TaskId   int
+	Name     string `json:"name"`
+	Complete bool   `json:"complete"`
+	Notes    string `json:"notes"`
 	// TODO implement the rest of the fields
 	// deadline/timeslot
 	// tags
@@ -177,7 +175,7 @@ UUID.  By default, the new Task is incomplete (Task.Complete = false), and
 has no notes associated with it. */
 func NewTask(name string) Task {
 	return Task{
-		TaskId:   uuid.New(),
+		TaskId:   0,
 		Name:     name,
 		Complete: false,
 		Notes:    "",
@@ -196,4 +194,11 @@ func (t Task) String() string {
 	}
 
 	return fmt.Sprintf("%s - %s", checkbox, t.Name)
+}
+
+// itob returns an 8-byte big endian representation of v.
+func itob(v int) []byte {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, uint64(v))
+	return b
 }

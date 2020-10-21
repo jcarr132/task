@@ -23,8 +23,8 @@ func main() {
 				Aliases: []string{"l"},
 				Usage:   "list all tasks",
 				Action: func(c *cli.Context) error {
-					for _, task := range tl.Tasks() {
-						fmt.Println(task)
+					for i, task := range tl.Tasks() {
+						fmt.Println(i+1, task)
 					}
 					return nil
 				},
