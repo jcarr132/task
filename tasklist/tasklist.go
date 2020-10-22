@@ -199,6 +199,7 @@ type Task struct {
 	Name     string `json:"name"`
 	Complete bool   `json:"complete"`
 	Notes    string `json:"notes"`
+	Priority int    `json:"priority"`
 	// TODO implement the rest of the fields
 	// deadline/timeslot
 	// tags
@@ -206,16 +207,22 @@ type Task struct {
 	// subtasks
 }
 
-/* NewTask returns a new Task struct with the given name and randomly generated
-UUID.  By default, the new Task is incomplete (Task.Complete = false), and
-has no notes associated with it. */
-func NewTask(name string) Task {
-	return Task{
+/* NewTask returns a new Task struct with the given name By default, the new
+* Task is incomplete, has zero priority, and has no notes associated with it.
+* */
+func NewTask(name string) (Task, error) {
+	if len(name) < 1 {
+		return Task{}, errors.New("cannot create a task without a name")
+	}
+
+	task := Task{
 		TaskId:   0,
 		Name:     name,
 		Complete: false,
 		Notes:    "",
 	}
+
+	return task, nil
 }
 
 /* String describes how the string representation of a Task struct and enables

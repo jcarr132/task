@@ -38,12 +38,28 @@ func main() {
 				},
 			},
 			{
-				Name:    "add",
-				Aliases: []string{"a"},
-				Usage:   "add a task to the tasklist",
+				Name:      "add",
+				Aliases:   []string{"a"},
+				Usage:     "add a task to the tasklist",
+				ArgsUsage: "[name: (string)]",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:    "priority",
+						Aliases: []string{"p"},
+						Usage:   "set the priority value for the task",
+					},
+				},
 				Action: func(c *cli.Context) error {
 					name := c.Args().Get(0)
-					tl.AddTask(tasklist.NewTask(name))
+					task, err := tasklist.NewTask(name)
+					if err != nil {
+						cli.ShowCommandHelp(c, "add")
+						log.Fatal(err)
+					}
+					if c.Int("priority") != 0 {
+						task.Priority = c.Int("priority")
+					}
+					tl.AddTask(task)
 					return nil
 				},
 			},
