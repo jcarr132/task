@@ -15,8 +15,16 @@ func main() {
 	defer tl.Db.Close()
 
 	app := &cli.App{
-		Name:  "task",
-		Usage: "manage tasks from the terminal",
+		Name:    "task",
+		Version: "v0.0.1",
+		Authors: []*cli.Author{
+			{
+				Name:  "J Carr",
+				Email: "joshcarr132@gmail.com",
+			},
+		},
+		HelpName: "task",
+		Usage:    "manage tasks from the terminal",
 		Commands: []*cli.Command{
 			{
 				Name:    "list",
