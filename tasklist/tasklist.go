@@ -6,7 +6,15 @@ package tasklist
 // TODO: Implement priorities and priority sorting. When viewing the list,
 // add a visual indication of priority tasks.
 
+// TODO: Implement deadlines/timeslots could be an array with two values,
+// second value nil if it's a deadline, otherwise its a timeslot
+
+// TODO: ordering of items. should keep a list of the order of tasks and when
+// retrieving from the database, present them in the same order. Order should
+// be manually changeable.
+
 import (
+	"errors"
 	"fmt"
 	"log"
 
