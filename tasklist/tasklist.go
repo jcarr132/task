@@ -98,11 +98,27 @@ func (tl TaskList) AddTask(task Task) error {
 	})
 }
 
+/* UpdateTask has the same functionality as AddTask except that it saves the item
+to the databse with the same key rather than assigning a new one. */
+func (tl TaskList) UpdateTask(task Task) error {
+	return tl.Db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("tasks"))
+
+		buf, err := json.Marshal(task)
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put(itob(task.TaskId), buf)
+
+	})
+}
+
 /* CompleteTask sets a Task's `complete` field to `true` and re-adds it to the
 database, overwriting the previous version. */
 func (tl TaskList) CompleteTask(task Task) {
 	task.Complete = true
-	if err := tl.AddTask(task); err != nil {
+	if err := tl.UpdateTask(task); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -111,7 +127,7 @@ func (tl TaskList) CompleteTask(task Task) {
 database, overwriting the previous version. */
 func (tl TaskList) UncompleteTask(task Task) {
 	task.Complete = false
-	if err := tl.AddTask(task); err != nil {
+	if err := tl.UpdateTask(task); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -125,7 +141,15 @@ func (tl TaskList) ToggleComplete(task Task) {
 	} else {
 		task.Complete = true
 	}
-	if err := tl.AddTask(task); err != nil {
+	if err := tl.UpdateTask(task); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// TODO docstring
+func (tl TaskList) SetPriority(task Task, p int) {
+	task.Priority = p
+	if err := tl.UpdateTask(task); err != nil {
 		log.Fatal(err)
 	}
 }
