@@ -61,7 +61,7 @@ func main() {
 			{
 				Name:    "uncomplete",
 				Aliases: []string{"C"},
-				Usage:   "mark a task as `incomplete`",
+				Usage:   "mark a task as 'incomplete'",
 				Action: func(c *cli.Context) error {
 					tl.UncompleteTask(tl.SelectTask())
 					return nil

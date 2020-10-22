@@ -21,14 +21,6 @@ A minimal CLI for tracking and managing tasks.
 - Push notifications across devices
 
 
-## Considerations
-- Centralized vs decentralized sync
-  - Centralized: App (and DB) live in a server, clients to connect. Everything
-    syncs to the server.
-  - Decentralized: Each instance of the app is independent, maintains it's own
-    database. Databases sync with each other.
-
-
 ## Task Schema
 - Simple data serialization format (YAML or TOML)
 - Fields:
@@ -39,3 +31,10 @@ A minimal CLI for tracking and managing tasks.
   - Priority
   - Notes
   - Subtasks
+
+
+## First Prototype
+The initial prototype should establish the basic functionality of managing
+tasks from the command line. TUI features are extraneous at this point. The
+emphasis is on developing a Task List API which will serve both the CLI and
+TUI interfaces.
