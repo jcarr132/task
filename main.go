@@ -44,6 +44,7 @@ func main() {
 				Aliases: []string{"r", "rm"},
 				Usage:   "remove a task from the list",
 				Action: func(c *cli.Context) error {
+					// TODO optional argument to select task
 					tl.RemoveTask(tl.SelectTask())
 					return nil
 				},

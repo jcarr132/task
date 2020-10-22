@@ -72,6 +72,7 @@ func (tl *TaskList) Tasks() []Task {
 /* AddTask accepts a Task struct as an argument and saves it to the database with
 its UUID (Task.TaskId) as the database key. */
 func (tl TaskList) AddTask(task Task) error {
+	// TODO add multiple tasks in one call
 	return tl.Db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("tasks"))
 
