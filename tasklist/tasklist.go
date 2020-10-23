@@ -15,10 +15,12 @@ package tasklist
 
 // TODO: replace log.Fatal with error returns.
 
+// TODO: better printing. use a table formatting package or something.
+
 import (
 	"errors"
 	"fmt"
-	"log"
+	// "log"
 
 	"github.com/boltdb/bolt"
 	// "github.com/google/uuid"
@@ -35,10 +37,10 @@ type TaskList struct {
 
 /* NewTaskList returns a new TaskList struct containing a connection to the
 database. */
-func NewTasklist() TaskList {
+func NewTasklist() (TaskList, error) {
 	db, err := bolt.Open("data", 0600, nil)
 	if err != nil {
-		log.Fatal(err)
+		return TaskList{}, err
 	}
 
 	err = db.Update(func(tx *bolt.Tx) error {
@@ -46,19 +48,19 @@ func NewTasklist() TaskList {
 		return err
 	})
 	if err != nil {
-		log.Fatal(err)
+		return TaskList{}, err
 	}
 
 	tl := TaskList{
 		Db: db,
 	}
 
-	return tl
+	return tl, nil
 }
 
 /* Tasks() queries the database returns a slice containing the tasks stored
 within. */
-func (tl *TaskList) Tasks() []Task {
+func (tl *TaskList) Tasks() ([]Task, error) {
 	var tasks []Task
 
 	err := tl.Db.View(func(tx *bolt.Tx) error {
@@ -76,10 +78,10 @@ func (tl *TaskList) Tasks() []Task {
 		return nil
 	})
 	if err != nil {
-		log.Fatal(err)
+		return tasks, err
 	}
 
-	return tasks
+	return tasks, nil
 }
 
 /* AddTask accepts a Task struct as an argument and saves it to the database with
@@ -116,42 +118,34 @@ func (tl TaskList) UpdateTask(task Task) error {
 
 /* CompleteTask sets a Task's `complete` field to `true` and re-adds it to the
 database, overwriting the previous version. */
-func (tl TaskList) CompleteTask(task Task) {
+func (tl TaskList) CompleteTask(task Task) error {
 	task.Complete = true
-	if err := tl.UpdateTask(task); err != nil {
-		log.Fatal(err)
-	}
+	return tl.UpdateTask(task)
 }
 
 /* UncompleteTask sets a Task's `complete` field to `false` and re-adds it to the
 database, overwriting the previous version. */
-func (tl TaskList) UncompleteTask(task Task) {
+func (tl TaskList) UncompleteTask(task Task) error {
 	task.Complete = false
-	if err := tl.UpdateTask(task); err != nil {
-		log.Fatal(err)
-	}
+	return tl.UpdateTask(task)
 }
 
 /* ToggleComplete changes the `complete` field of a Task from `true` to `false` or
 from `true` to `false` as appropriate and re-adds it to the database, overwriting
 the previous version. */
-func (tl TaskList) ToggleComplete(task Task) {
+func (tl TaskList) ToggleComplete(task Task) error {
 	if task.Complete == true {
 		task.Complete = false
 	} else {
 		task.Complete = true
 	}
-	if err := tl.UpdateTask(task); err != nil {
-		log.Fatal(err)
-	}
+	return tl.UpdateTask(task)
 }
 
 // TODO docstring
-func (tl TaskList) SetPriority(task Task, p int) {
+func (tl TaskList) SetPriority(task Task, p int) error {
 	task.Priority = p
-	if err := tl.UpdateTask(task); err != nil {
-		log.Fatal(err)
-	}
+	return tl.UpdateTask(task)
 }
 
 /* SelectTask prints an enumerated list of tasks to stdout and accepts an integer
@@ -161,10 +155,15 @@ another method that accepts a Task struct such as TaskList.Complete(...).
 Example:
 					tl.CompleteTask(tl.SelectTask())
 */
-func (tl TaskList) SelectTask(selection int) Task {
-	tasks := tl.Tasks()
+func (tl TaskList) SelectTask(selection int) (Task, error) {
+
+	tasks, err := tl.Tasks()
+	if err != nil {
+		return Task{}, err
+	}
+
 	if selection != 0 {
-		return tasks[selection-1]
+		return tasks[selection-1], nil
 	}
 
 	for i, task := range tasks {
@@ -172,15 +171,15 @@ func (tl TaskList) SelectTask(selection int) Task {
 	}
 
 	fmt.Print("Enter selection: ")
-	_, err := fmt.Scanf("%d", &selection)
+	_, err = fmt.Scanf("%d", &selection)
 	if err != nil {
-		log.Fatal(err)
+		return Task{}, err
 	}
 	if selection < 1 || selection > len(tasks) {
-		log.Fatal(errors.New("invalid selection"))
+		return Task{}, errors.New("invalid selection")
 	}
 
-	return tasks[selection-1]
+	return tasks[selection-1], nil
 }
 
 /* RemoveTask deletes a task from the database. */

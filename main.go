@@ -13,7 +13,10 @@ import (
 )
 
 func main() {
-	tl := tasklist.NewTasklist()
+	tl, err := tasklist.NewTasklist()
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer tl.Db.Close()
 
 	app := &cli.App{
@@ -35,11 +38,16 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{
 						Name:    "priority",
+						Usage:   "include the priority value for each task",
 						Aliases: []string{"p"},
 					},
 				},
 				Action: func(c *cli.Context) error {
-					for i, task := range tl.Tasks() {
+					tasks, err := tl.Tasks()
+					if err != nil {
+						return err
+					}
+					for i, task := range tasks {
 						if c.Bool("priority") {
 							fmt.Println(i+1, task, task.Priority)
 						} else {
@@ -71,8 +79,7 @@ func main() {
 					if c.Int("priority") != 0 {
 						task.Priority = c.Int("priority")
 					}
-					tl.AddTask(task)
-					return nil
+					return tl.AddTask(task)
 				},
 			},
 			{
@@ -83,8 +90,11 @@ func main() {
 					&TargetFlag,
 				},
 				Action: func(c *cli.Context) error {
-					tl.RemoveTask(tl.SelectTask(c.Int("target")))
-					return nil
+					task, err := tl.SelectTask(c.Int("target"))
+					if err != nil {
+						return err
+					}
+					return tl.RemoveTask(task)
 				},
 			},
 			{
@@ -95,8 +105,12 @@ func main() {
 					&TargetFlag,
 				},
 				Action: func(c *cli.Context) error {
-					tl.CompleteTask(tl.SelectTask(c.Int("target")))
-					return nil
+					task, err := tl.SelectTask(c.Int("target"))
+					if err != nil {
+						return err
+					}
+
+					return tl.CompleteTask(task)
 				},
 			},
 			{
@@ -107,8 +121,11 @@ func main() {
 					&TargetFlag,
 				},
 				Action: func(c *cli.Context) error {
-					tl.UncompleteTask(tl.SelectTask(c.Int("target")))
-					return nil
+					task, err := tl.SelectTask(c.Int("target"))
+					if err != nil {
+						return err
+					}
+					return tl.UncompleteTask(task)
 				},
 			},
 			{
@@ -119,8 +136,11 @@ func main() {
 					&TargetFlag,
 				},
 				Action: func(c *cli.Context) error {
-					tl.ToggleComplete(tl.SelectTask(c.Int("target")))
-					return nil
+					task, err := tl.SelectTask(c.Int("target"))
+					if err != nil {
+						return err
+					}
+					return tl.ToggleComplete(task)
 				},
 			},
 			{
@@ -135,14 +155,16 @@ func main() {
 					if err != nil {
 						return err
 					}
-					task := tl.SelectTask(c.Int("target"))
+					task, err := tl.SelectTask(c.Int("target"))
+					if err != nil {
+						return err
+					}
 					task.Priority = newVal
-					tl.UpdateTask(task)
-					return nil
+					return tl.UpdateTask(task)
 				},
 			},
 			{
-				// Next subcommand
+				// Next command
 			},
 		},
 	}
