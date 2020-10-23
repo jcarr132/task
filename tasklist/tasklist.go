@@ -13,6 +13,8 @@ package tasklist
 // retrieving from the database, present them in the same order. Order should
 // be manually changeable.
 
+// TODO: replace log.Fatal with error returns.
+
 import (
 	"errors"
 	"fmt"
@@ -108,9 +110,7 @@ func (tl TaskList) UpdateTask(task Task) error {
 		if err != nil {
 			return err
 		}
-
 		return bucket.Put(itob(task.TaskId), buf)
-
 	})
 }
 
@@ -161,18 +161,23 @@ another method that accepts a Task struct such as TaskList.Complete(...).
 Example:
 					tl.CompleteTask(tl.SelectTask())
 */
-func (tl TaskList) SelectTask() Task {
+func (tl TaskList) SelectTask(selection int) Task {
 	tasks := tl.Tasks()
+	if selection != 0 {
+		return tasks[selection-1]
+	}
 
 	for i, task := range tasks {
 		fmt.Println(i+1, task)
 	}
 
 	fmt.Print("Enter selection: ")
-	var selection int
 	_, err := fmt.Scanf("%d", &selection)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if selection < 1 || selection > len(tasks) {
+		log.Fatal(errors.New("invalid selection"))
 	}
 
 	return tasks[selection-1]

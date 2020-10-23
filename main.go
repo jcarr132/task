@@ -1,9 +1,11 @@
 package main
 
 import (
+	// "errors"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"task/tasklist"
 
@@ -30,9 +32,19 @@ func main() {
 				Name:    "list",
 				Aliases: []string{"l"},
 				Usage:   "list all tasks",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{
+						Name:    "priority",
+						Aliases: []string{"p"},
+					},
+				},
 				Action: func(c *cli.Context) error {
 					for i, task := range tl.Tasks() {
-						fmt.Println(i+1, task)
+						if c.Bool("priority") {
+							fmt.Println(i+1, task, task.Priority)
+						} else {
+							fmt.Println(i+1, task)
+						}
 					}
 					return nil
 				},
@@ -54,7 +66,7 @@ func main() {
 					task, err := tasklist.NewTask(name)
 					if err != nil {
 						cli.ShowCommandHelp(c, "add")
-						log.Fatal(err)
+						return err
 					}
 					if c.Int("priority") != 0 {
 						task.Priority = c.Int("priority")
@@ -67,9 +79,11 @@ func main() {
 				Name:    "remove",
 				Aliases: []string{"r", "rm"},
 				Usage:   "remove a task from the list",
+				Flags: []cli.Flag{
+					&TargetFlag,
+				},
 				Action: func(c *cli.Context) error {
-					// TODO optional argument to select task
-					tl.RemoveTask(tl.SelectTask())
+					tl.RemoveTask(tl.SelectTask(c.Int("target")))
 					return nil
 				},
 			},
@@ -77,8 +91,11 @@ func main() {
 				Name:    "complete",
 				Aliases: []string{"c"},
 				Usage:   "mark a task as 'completed'",
+				Flags: []cli.Flag{
+					&TargetFlag,
+				},
 				Action: func(c *cli.Context) error {
-					tl.CompleteTask(tl.SelectTask())
+					tl.CompleteTask(tl.SelectTask(c.Int("target")))
 					return nil
 				},
 			},
@@ -86,17 +103,41 @@ func main() {
 				Name:    "uncomplete",
 				Aliases: []string{"C"},
 				Usage:   "mark a task as 'incomplete'",
+				Flags: []cli.Flag{
+					&TargetFlag,
+				},
 				Action: func(c *cli.Context) error {
-					tl.UncompleteTask(tl.SelectTask())
+					tl.UncompleteTask(tl.SelectTask(c.Int("target")))
 					return nil
 				},
 			},
 			{
 				Name:    "toggle",
-				Aliases: []string{"t"},
+				Aliases: []string{"tog"},
 				Usage:   "toggle the completion state of a task",
+				Flags: []cli.Flag{
+					&TargetFlag,
+				},
 				Action: func(c *cli.Context) error {
-					tl.ToggleComplete(tl.SelectTask())
+					tl.ToggleComplete(tl.SelectTask(c.Int("target")))
+					return nil
+				},
+			},
+			{
+				Name:    "priority",
+				Aliases: []string{"p"},
+				Usage:   "set the priority level of a task",
+				Flags: []cli.Flag{
+					&TargetFlag,
+				},
+				Action: func(c *cli.Context) error {
+					newVal, err := strconv.Atoi(c.Args().First())
+					if err != nil {
+						return err
+					}
+					task := tl.SelectTask(c.Int("target"))
+					task.Priority = newVal
+					tl.UpdateTask(task)
 					return nil
 				},
 			},
@@ -109,4 +150,12 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+/* TargetFlag is used by several commands to specify a Task from the TaskList
+* to act on. */
+var TargetFlag = cli.IntFlag{
+	Name:    "target",
+	Aliases: []string{"t"},
+	Usage:   "the task to act on (use 'task list' to get value)",
 }
