@@ -40,8 +40,9 @@ type TaskList struct {
 
 /* NewTaskList returns a new TaskList struct containing a connection to the
 database. */
-func NewTasklist() (TaskList, error) {
-	db, err := bolt.Open("data", 0600, nil)
+func NewTasklist(dbpath string) (TaskList, error) {
+	fmt.Println(dbpath)
+	db, err := bolt.Open(dbpath, 0600, nil)
 	if err != nil {
 		return TaskList{}, err
 	}

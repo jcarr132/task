@@ -1,23 +1,22 @@
 package main
 
 import (
-	// "errors"
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"strconv"
 
 	"task/tasklist"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	tl, err := tasklist.NewTasklist()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer tl.Db.Close()
+	var tl tasklist.TaskList
+	var err error
+	var dbpath string
 
 	app := &cli.App{
 		Name:    "task",
@@ -30,6 +29,34 @@ func main() {
 		},
 		HelpName: "task",
 		Usage:    "manage tasks from the terminal",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "dbpath",
+				Aliases: []string{"db"},
+				Usage:   "set the location of the task database (default $HOME/.taskdb)",
+			},
+		},
+		Before: func(c *cli.Context) error {
+			if c.IsSet("dbpath") {
+				dbpath, err = homedir.Expand(c.String("dbpath"))
+			} else {
+				dbpath, err = homedir.Dir()
+				dbpath = path.Join(dbpath, ".taskdb")
+			}
+
+			tl, err = tasklist.NewTasklist(dbpath)
+			if err != nil {
+				log.Fatal(err)
+			}
+			return nil
+		},
+		After: func(c *cli.Context) error {
+			err = tl.Db.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+			return nil
+		},
 		Commands: []*cli.Command{
 			{
 				Name:    "list",
