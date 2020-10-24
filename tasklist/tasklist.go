@@ -3,9 +3,6 @@ defines the TaskList struct type, which wraps the database connection, and
 the Task struct, which holds data for a single task. */
 package tasklist
 
-// TODO: fix database location. right now it creates a database in $PWD wherever
-// it is called.
-
 // TODO: Implement priorities and priority sorting. When viewing the list,
 // add a visual indication of priority tasks.
 
@@ -15,8 +12,6 @@ package tasklist
 // TODO: ordering of items. should keep a list of the order of tasks and when
 // retrieving from the database, present them in the same order. Order should
 // be manually changeable.
-
-// TODO: replace log.Fatal with error returns.
 
 // TODO: better printing. use a table formatting package or something.
 
