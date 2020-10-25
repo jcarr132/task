@@ -87,7 +87,7 @@ func (tl TaskList) PrintTasks() error {
 		return err
 	}
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"#", "Status", "Task"})
+	table.SetHeader([]string{"# ", "Status", "Task", "Priority"})
 	table.SetBorder(false)
 	table.SetAutoFormatHeaders(false)
 	table.SetCaption(true, "\n")
@@ -95,10 +95,11 @@ func (tl TaskList) PrintTasks() error {
 	for i, task := range tasks {
 		checkbox := "[ ]"
 		num := strconv.Itoa(i + 1)
+		priority := strconv.Itoa(task.Priority)
 		if task.Complete {
 			checkbox = "[x]"
 		}
-		table.Append([]string{num, checkbox, task.Name})
+		table.Append([]string{num, checkbox, task.Name, priority})
 	}
 
 	table.Render()

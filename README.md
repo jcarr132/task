@@ -6,7 +6,7 @@ implemented.
 
 
 ## Dependencies
-- Go 1.15 - required to build the program
+- Go 1.15 or later is required to build the program
 
 
 ## Installation

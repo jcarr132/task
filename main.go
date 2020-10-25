@@ -37,7 +37,7 @@ func main() {
 			},
 		},
 		Before: func(c *cli.Context) error {
-			fmt.Printf("Task CLI - %s\n\n", c.App.Version)
+			fmt.Printf("Task CLI - %s\n", c.App.Version)
 
 			if c.IsSet("dbpath") {
 				dbpath, err = homedir.Expand(c.String("dbpath"))
