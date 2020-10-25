@@ -6,7 +6,7 @@ implemented.
 
 ## Usage
 ```
-task
+$ task
 Task CLI - v0.0.1
 
 Opened task database at /home/jc/.taskdb
