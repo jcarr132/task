@@ -13,8 +13,6 @@ package tasklist
 // retrieving from the database, present them in the same order. Order should
 // be manually changeable.
 
-// TODO: better printing. use a table formatting package or something.
-
 import (
 	"errors"
 	"fmt"
