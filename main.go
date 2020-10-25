@@ -45,16 +45,13 @@ func main() {
 			}
 
 			tl, err = tasklist.NewTasklist(dbpath)
-			if err != nil {
-				log.Fatal(err)
-			}
+			LogFatalIfErr(err)
+			fmt.Println("Opened task database at", dbpath)
 			return nil
 		},
 		After: func(c *cli.Context) error {
 			err = tl.Db.Close()
-			if err != nil {
-				log.Fatal(err)
-			}
+			LogFatalIfErr(err)
 			return nil
 		},
 		Commands: []*cli.Command{
@@ -196,9 +193,8 @@ func main() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
-	}
+	err = app.Run(os.Args)
+	LogFatalIfErr(err)
 }
 
 /* TargetFlag is used by several commands to specify a Task from the TaskList
@@ -207,4 +203,10 @@ var TargetFlag = cli.IntFlag{
 	Name:    "target",
 	Aliases: []string{"t"},
 	Usage:   "the task to act on (use 'task list' to get value)",
+}
+
+func LogFatalIfErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
