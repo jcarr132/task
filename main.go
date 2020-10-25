@@ -37,6 +37,8 @@ func main() {
 			},
 		},
 		Before: func(c *cli.Context) error {
+			fmt.Printf("Task CLI - %s\n\n", c.App.Version)
+
 			if c.IsSet("dbpath") {
 				dbpath, err = homedir.Expand(c.String("dbpath"))
 			} else {
@@ -46,7 +48,7 @@ func main() {
 
 			tl, err = tasklist.NewTasklist(dbpath)
 			LogFatalIfErr(err)
-			fmt.Println("Opened task database at", dbpath)
+			fmt.Printf("Opened task database at %s\n\n", dbpath)
 			return nil
 		},
 		After: func(c *cli.Context) error {
@@ -67,17 +69,7 @@ func main() {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					tasks, err := tl.Tasks()
-					if err != nil {
-						return err
-					}
-					for i, task := range tasks {
-						if c.Bool("priority") {
-							fmt.Println(i+1, task, task.Priority)
-						} else {
-							fmt.Println(i+1, task)
-						}
-					}
+					tl.PrintTasks()
 					return nil
 				},
 			},

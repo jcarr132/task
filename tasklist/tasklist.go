@@ -18,8 +18,11 @@ package tasklist
 import (
 	"errors"
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/boltdb/bolt"
+	"github.com/olekukonko/tablewriter"
 
 	"encoding/binary"
 	"encoding/json"
@@ -78,6 +81,30 @@ func (tl *TaskList) Tasks() ([]Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func (tl TaskList) PrintTasks() error {
+	tasks, err := tl.Tasks()
+	if err != nil {
+		return err
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"#", "Status", "Task"})
+	table.SetBorder(false)
+	table.SetAutoFormatHeaders(false)
+	table.SetCaption(true, "\n")
+
+	for i, task := range tasks {
+		checkbox := "[ ]"
+		num := strconv.Itoa(i + 1)
+		if task.Complete {
+			checkbox = "[x]"
+		}
+		table.Append([]string{num, checkbox, task.Name})
+	}
+
+	table.Render()
+	return nil
 }
 
 /* AddTask accepts a Task struct as an argument and saves it to the database with
