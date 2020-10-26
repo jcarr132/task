@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/boltdb/bolt"
 	"github.com/olekukonko/tablewriter"
@@ -222,10 +223,11 @@ func (tl TaskList) RemoveTask(task Task) error {
 which is used as it's primary identifier. */
 type Task struct {
 	TaskId   int
-	Name     string `json:"name"`
-	Complete bool   `json:"complete"`
-	Notes    string `json:"notes"`
-	Priority int    `json:"priority"`
+	Name     string    `json:"name"`
+	Complete bool      `json:"complete"`
+	Created  time.Time `json:"created"`
+	Notes    string    `json:"notes"`
+	Priority int       `json:"priority"`
 	// TODO implement the rest of the fields
 	// deadline/timeslot
 	// tags
@@ -245,6 +247,7 @@ func NewTask(name string) (Task, error) {
 		TaskId:   0,
 		Name:     name,
 		Complete: false,
+		Created:  time.Now(),
 		Notes:    "",
 	}
 
