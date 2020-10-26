@@ -4,7 +4,8 @@ the Task struct, which holds data for a single task. */
 package tasklist
 
 // TODO: Implement priorities and priority sorting. When viewing the list,
-// add a visual indication of priority tasks.
+// add a visual indication of priority tasks. Options for how to sort such as
+// by priority, by deadline, by date added, ascending or descending.
 
 // TODO: Implement deadlines/timeslots could be an array with two values,
 // second value nil if it's a deadline, otherwise its a timeslot

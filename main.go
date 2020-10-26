@@ -23,7 +23,7 @@ func main() {
 		Version: "v0.0.1",
 		Authors: []*cli.Author{
 			{
-				Name:  "J Carr",
+				Name:  "JK Carr",
 				Email: "joshcarr132@gmail.com",
 			},
 		},
