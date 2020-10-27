@@ -3,12 +3,12 @@ defines the TaskList struct type, which wraps the database connection, and
 the Task struct, which holds data for a single task. */
 package tasklist
 
-// TODO: Implement priorities and priority sorting. When viewing the list,
-// add a visual indication of priority tasks. Options for how to sort such as
-// by priority, by deadline, by date added, ascending or descending.
+// TODO: sorting based on priority, deadline, date added
 
-// TODO: Implement deadlines/timeslots could be an array with two values,
-// second value nil if it's a deadline, otherwise its a timeslot
+// TODO: filtering based on completion status, priority != 0,
+// deadline or no deadline, has notes, eventually based on tags
+
+// TODO: optional duration for timeblock-based tasks or appointments
 
 // TODO: ordering of items. should keep a list of the order of tasks and when
 // retrieving from the database, present them in the same order. Order should
