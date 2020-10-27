@@ -172,6 +172,12 @@ func (tl TaskList) SetPriority(task Task, p int) error {
 	return tl.UpdateTask(task)
 }
 
+// TODO docstring
+func (tl TaskList) SetDeadline(task Task, deadline time.Time) error {
+	task.Deadline = deadline
+	return tl.UpdateTask(task)
+}
+
 /* SelectTask prints an enumerated list of tasks to stdout and accepts an integer
 input from the user indicating which Task struct to return. Used in conjunction with
 another method that accepts a Task struct such as TaskList.Complete(...).
@@ -227,6 +233,7 @@ type Task struct {
 	Name     string    `json:"name"`
 	Complete bool      `json:"complete"`
 	Created  time.Time `json:"created"`
+	Deadline time.Time `json:"deadline"`
 	Notes    string    `json:"notes"`
 	Priority int       `json:"priority"`
 	// TODO implement the rest of the fields
@@ -249,6 +256,7 @@ func NewTask(name string) (Task, error) {
 		Name:     name,
 		Complete: false,
 		Created:  time.Now(),
+		Deadline: time.Time{},
 		Notes:    "",
 	}
 

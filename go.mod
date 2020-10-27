@@ -3,6 +3,7 @@ module task
 go 1.15
 
 require (
+	github.com/araddon/dateparse v0.0.0-20201001162425-8aadafed4dc4
 	github.com/boltdb/bolt v1.3.1
 	github.com/google/uuid v1.1.2
 	github.com/mitchellh/go-homedir v1.1.0

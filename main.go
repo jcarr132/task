@@ -9,6 +9,7 @@ import (
 
 	"task/tasklist"
 
+	"github.com/araddon/dateparse"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli/v2"
 )
@@ -82,7 +83,13 @@ func main() {
 					&cli.IntFlag{
 						Name:    "priority",
 						Aliases: []string{"p"},
-						Usage:   "set the priority value for the task",
+						Usage:   "set the priority `VALUE` for the task",
+					},
+					&cli.StringFlag{
+						Name:    "deadline",
+						Value:   "nil",
+						Aliases: []string{"d"},
+						Usage:   "assign a `DEADLINE` for the task",
 					},
 				},
 				Action: func(c *cli.Context) error {
@@ -94,6 +101,11 @@ func main() {
 					}
 					if c.Int("priority") != 0 {
 						task.Priority = c.Int("priority")
+					}
+					if c.IsSet("deadline") {
+						deadline, err := dateparse.ParseAny(c.String("deadline"))
+						LogFatalIfErr(err)
+						task.Deadline = deadline
 					}
 					return tl.AddTask(task)
 				},
