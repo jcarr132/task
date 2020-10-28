@@ -63,10 +63,10 @@ func main() {
 				Aliases: []string{"l"},
 				Usage:   "list all tasks",
 				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:    "priority",
-						Usage:   "include the priority value for each task",
-						Aliases: []string{"p"},
+					&cli.StringFlag{
+						Name:    "sort",
+						Aliases: []string{"s"},
+						Usage:   "sort the task list based on `VAL` = [priority|created|deadline]",
 					},
 				},
 				Action: func(c *cli.Context) error {

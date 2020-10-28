@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -226,6 +227,34 @@ func (tl TaskList) RemoveTask(task Task) error {
 	})
 }
 
+// TODO docstring
+func (tl TaskList) SortByCreated(task_slice []Task, reverse bool) []Task {
+	if !reverse {
+		sort.Slice(task_slice, func(i, j int) bool {
+			return task_slice[i].Created.Before(task_slice[j].Created)
+		})
+	} else {
+		sort.Slice(task_slice, func(i, j int) bool {
+			return task_slice[j].Created.Before(task_slice[i].Created)
+		})
+	}
+	return task_slice
+}
+
+// TODO docstring
+func (tl TaskList) SortByPriority(task_slice []Task, reverse bool) []Task {
+	if !reverse {
+		sort.Slice(task_slice, func(i, j int) bool {
+			return task_slice[j].Priority < task_slice[i].Priority
+		})
+	} else {
+		sort.Slice(task_slice, func(i, j int) bool {
+			return task_slice[i].Priority < task_slice[j].Priority
+		})
+	}
+	return task_slice
+}
+
 /* The Task struct holds data about a task. Each Task is assigned a random UUID
 which is used as it's primary identifier. */
 type Task struct {
@@ -237,9 +266,7 @@ type Task struct {
 	Notes    string    `json:"notes"`
 	Priority int       `json:"priority"`
 	// TODO implement the rest of the fields
-	// deadline/timeslot
 	// tags
-	// priority
 	// subtasks
 }
 
